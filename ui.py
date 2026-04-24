@@ -66,7 +66,7 @@ def manage_context_window(results, max_chars=2500):
     return filtered
 
 
-HF_API_TOKEN = os.getenv("HF_API_TOKEN")
+HF_API_TOKEN = st.secrets["HF_API_TOKEN"]
 
 
 def generate_answer(prompt):
