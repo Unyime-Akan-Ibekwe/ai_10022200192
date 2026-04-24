@@ -4,5 +4,4 @@ numpy
 sentence-transformers
 faiss-cpu
 pdfplumber
-transformers
-torch
+
