@@ -4,4 +4,5 @@ numpy
 sentence-transformers
 faiss-cpu
 pdfplumber
-
+requests
+groq
