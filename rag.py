@@ -111,6 +111,8 @@ def expand_query(query):
         expansions.append(query + " fiscal policy government spending")
     if "fiscal" in query:
         expansions.append(query + " debt arrears deficit risks challenges energy cocoa financial sector")
+    if "won" in query or "winner" in query or "election" in query:
+        expansions.append(query + " national winner total votes nationwide result")
 
     return expansions
 
@@ -162,6 +164,7 @@ def get_winners_from_csv(df):
         pct = round((national_winner["Votes"] / total_votes) * 100, 2)
 
         winners.append(
+            f"NATIONAL ELECTION RESULT: National winner of {year} Ghana election: {national_winner['Candidate']} "
             f"National winner of {year} Ghana election: {national_winner['Candidate']} "
             f"({national_winner['Party']}) with {national_winner['Votes']:,} total votes nationwide ({pct}%)"
         )
