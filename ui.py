@@ -17,8 +17,11 @@ st.markdown("""
 <p style='text-align: center; color: gray;'>Ask questions about Ghana Elections & 2025 Budget</p>
 """, unsafe_allow_html=True)
 
+st.write("Starting system setup...")
+
+
 # --- 1. CACHED SETUP (Runs once) ---
-@st.cache_resource
+# --- @st.cache_resource
 def setup_system():
     try:
         with st.spinner("Loading Data & Models... (This takes a moment)"):
@@ -42,7 +45,11 @@ def setup_system():
           tokenizer = AutoTokenizer.from_pretrained(model_id)
           model_llm = AutoModelForSeq2SeqLM.from_pretrained(model_id)
 
-          st.write("FILES:", os.listdir("data"))
+          if os.path.exists("data"):
+              st.write("FILES:", os.listdir("data"))
+          else:
+              st.error("DATA FOLDER NOT FOUND")
+
         
           return chunks, index, tokenizer, model_llm
 
@@ -53,11 +60,14 @@ def setup_system():
         raise e
 
 
-st.write("Data loaded successfully")
 
-st.write(os.listdir("data"))
+try:
+    chunks, index, tokenizer, model_llm = setup_system()
+    st.success("System loaded successfully")
+except Exception as e:
+    st.stop()
 
-chunks, index, tokenizer, model_llm = setup_system()
+
 
 # --- 2. HELPER FUNCTIONS ---
 def manage_context_window(results, max_chars=2000):
