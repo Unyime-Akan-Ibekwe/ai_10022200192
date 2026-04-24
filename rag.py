@@ -10,13 +10,14 @@ import numpy as np
 def load_csv(path):
     df = pd.read_csv(path)
     df = df.fillna("")
-    print(df.columns)
+    df["Votes"] = pd.to_numeric(df["Votes"].astype(str).str.replace(",", ""), errors="coerce").fillna(0)
     
     # Converting rows to text
     texts = df.apply(lambda row: 
     f"Year {row['Year']}, Region {row['New Region']}, "
     f"Candidate {row['Candidate']}, Party {row['Party']}, "
-    f"Votes {row['Votes']}, Percentage {row['Votes(%)']}", 
+    f"Votes {row['Votes']}, Percentage {row['Votes(%)']}",
+                     df["Votes(%)"] = pd.to_numeric(df["Votes(%)"].astype(str).str.replace("%", ""), errors="coerce").fillna(0)
     axis=1)
     winners = get_winners_from_csv(df)
 
