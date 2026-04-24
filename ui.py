@@ -66,47 +66,24 @@ def manage_context_window(results, max_chars=2500):
     return filtered
 
 
-HF_API_TOKEN = st.secrets["HF_API_TOKEN"]
+GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 
 def generate_answer(prompt):
-    API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1"
+    from groq import Groq
 
-    headers = {
-        "Authorization": f"Bearer {HF_API_TOKEN}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "inputs": prompt[:3000],
-        "parameters": {
-            "max_new_tokens": 300,
-            "temperature": 0.5,
-            "do_sample": True,
-            "return_full_text": False
-        }
-    }
+    client = Groq(api_key=GROQ_API_KEY)
 
     try:
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
+        response = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=300,
+            temperature=0.5
+        )
+        return response.choices[0].message.content
 
-        if response.status_code == 503:
-            return "Model is loading, please wait 20 seconds and try again."
-
-        if response.status_code != 200:
-            return f"Error {response.status_code}: {response.text}"
-
-        result = response.json()
-
-        if isinstance(result, dict) and "error" in result:
-            return f"Model issue: {result['error']}"
-
-        if isinstance(result, list):
-            return result[0].get("generated_text", str(result[0]))
-
-        return str(result)
-
-    except requests.exceptions.Timeout:
-        return "Request timed out. The model may be cold-starting, try again."
     except Exception as e:
         return f"Unexpected error: {str(e)}"
 
