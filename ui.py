@@ -23,33 +23,31 @@ st.write("Starting system setup...")
 # --- 1. CACHED SETUP (Runs once) ---
 @st.cache_resource
 def setup_system():
-    try:
-        with st.spinner("Loading Data & Models... (This takes a moment)"):
-          # Data
-          csv_data, winner_chunks = load_csv("data/Ghana_Election_Result.csv")
-          pdf_data = load_pdf("data/budget.pdf")
-        
-          pdf_chunks = chunk_text(pdf_data)
-          csv_chunks = csv_data
-        
-          chunks = []
-          chunks.extend(csv_chunks)
-          chunks.extend(pdf_chunks)
-          chunks.extend(winner_chunks)
-        
-          # Index
-          index = build_index(chunks)
-        
-          # LLM
-          model_id = "google/flan-t5-small"
+    with st.spinner("Loading Data & Models... (This takes a moment)"):
 
-          if os.path.exists("data"):
-              st.write("FILES:", os.listdir("data"))
-          else:
-              st.error("DATA FOLDER NOT FOUND")
+        # Data
+        csv_data, winner_chunks = load_csv("data/Ghana_Election_Result.csv")
+        pdf_data = load_pdf("data/budget.pdf")
 
-        
-          return chunks, index, tokenizer, model_llm
+        pdf_chunks = chunk_text(pdf_data)
+        csv_chunks = csv_data
+
+        chunks = []
+        chunks.extend(csv_chunks)
+        chunks.extend(pdf_chunks)
+        chunks.extend(winner_chunks)
+
+        # Index
+        index = build_index(chunks)
+
+        return chunks, index
+
+
+model_id = "google/flan-t5-small"
+
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+model_llm = AutoModelForSeq2SeqLM.from_pretrained(model_id)
+
 
     except Exception as e:
         st.error("CRASH DETECTED:")
@@ -140,19 +138,21 @@ if st.button("🚀 Submit", use_container_width=True):
 
         with st.spinner("Thinking... generating answer..."):
 
+            inputs = tokenizer(prompt, return_tensors="pt")
+
+            outputs = model_llm.generate(
+                                 **inputs,
+                                 max_new_tokens=200,
+                                 do_sample=True,
+                                 temperature=0.7
+            )
+
+            generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+
             # Context Management & Prompting
             filtered_results = manage_context_window(results, max_chars=3000)
             prompt = build_prompt(query, filtered_results)
-            
-            # Manual LLM Generation
-            @st.cache_resource
-            def load_llm():
-                 model_id = "google/flan-t5-small"
-                 tokenizer = AutoTokenizer.from_pretrained(model_id)
-                 model = AutoModelForSeq2SeqLM.from_pretrained(model_id)
-                 return tokenizer, model
-
-            tokenizer, model_llm = load_llm()
 
 
 
