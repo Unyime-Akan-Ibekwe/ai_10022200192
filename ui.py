@@ -2,6 +2,8 @@ import streamlit as st
 from rag import load_csv, load_pdf, chunk_text, build_index, hybrid_retrieve
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 import os
+import traceback
+
 
 
 # 1. Page Config MUST be the very first Streamlit command
@@ -18,28 +20,38 @@ st.markdown("""
 # --- 1. CACHED SETUP (Runs once) ---
 @st.cache_resource
 def setup_system():
-    with st.spinner("Loading Data & Models... (This takes a moment)"):
-        # Data
-        csv_data, winner_chunks = load_csv("data/Ghana_Election_Result.csv")
-        pdf_data = load_pdf("data/budget.pdf")
+    try:
+        with st.spinner("Loading Data & Models... (This takes a moment)"):
+          # Data
+          csv_data, winner_chunks = load_csv("data/Ghana_Election_Result.csv")
+          pdf_data = load_pdf("data/budget.pdf")
         
-        pdf_chunks = chunk_text(pdf_data)
-        csv_chunks = csv_data
+          pdf_chunks = chunk_text(pdf_data)
+          csv_chunks = csv_data
         
-        chunks = []
-        chunks.extend(csv_chunks)
-        chunks.extend(pdf_chunks)
-        chunks.extend(winner_chunks)
+          chunks = []
+          chunks.extend(csv_chunks)
+          chunks.extend(pdf_chunks)
+          chunks.extend(winner_chunks)
         
-        # Index
-        index = build_index(chunks)
+          # Index
+          index = build_index(chunks)
         
-        # LLM
-        model_id = "google/flan-t5-small"
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
-        model_llm = AutoModelForSeq2SeqLM.from_pretrained(model_id)
+          # LLM
+          model_id = "google/flan-t5-small"
+          tokenizer = AutoTokenizer.from_pretrained(model_id)
+          model_llm = AutoModelForSeq2SeqLM.from_pretrained(model_id)
+
+          st.write("FILES:", os.listdir("data"))
         
-        return chunks, index, tokenizer, model_llm
+          return chunks, index, tokenizer, model_llm
+
+    except Exception as e:
+        st.error("CRASH DETECTED:")
+        st.text(str(e))
+        st.text(traceback.format_exc())
+        raise e
+
 
 st.write("Data loaded successfully")
 
