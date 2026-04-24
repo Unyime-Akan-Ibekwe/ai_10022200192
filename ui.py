@@ -1,8 +1,8 @@
 import streamlit as st
 from rag import load_csv, load_pdf, chunk_text, build_index, hybrid_retrieve
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 import traceback
-
+import os
+import requests
 
 
 
@@ -42,11 +42,7 @@ def setup_system():
 
         index = build_index(chunks)
 
-        model_id = "google/flan-t5-small"
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
-        model_llm = AutoModelForSeq2SeqLM.from_pretrained(model_id)
-
-        return chunks, index, tokenizer, model_llm
+        return chunks, index
 
     except Exception:
         st.error("System failed to load ❌")
@@ -54,7 +50,8 @@ def setup_system():
         st.stop()
 
 
-chunks, index, tokenizer, model_llm = setup_system()
+
+chunks, index = setup_system()
 
 st.success("System loaded successfully ✅")
 
@@ -71,6 +68,40 @@ def manage_context_window(results, max_chars=2500):
             filtered.append((chunk, score))
 
     return filtered
+
+HF_API_TOKEN = os.getenv("HF_API_TOKEN")
+
+def generate_answer(prompt):
+    API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-small"
+
+    headers = {
+        "Authorization": f"Bearer {HF_API_TOKEN}"
+    }
+
+    payload = {
+        "inputs": prompt,
+        "parameters": {
+            "max_new_tokens": 200,
+            "temperature": 0.7
+        }
+    }
+
+    response = requests.post(API_URL, headers=headers, json=payload)
+
+    if response.status_code != 200:
+        return f"Error: {response.text}"
+
+    result = response.json()
+
+    # HF sometimes returns list or dict
+    if isinstance(result, list):
+        return result[0]["generated_text"]
+    elif isinstance(result, dict):
+        return result.get("generated_text", str(result))
+
+    return str(result)
+
+
 
 
 def build_prompt(query, results):
@@ -133,16 +164,8 @@ if st.button("🚀 Submit") and query:
 
     # STEP 4: GENERATION
     with st.spinner("Generating answer..."):
-        inputs = tokenizer(prompt, return_tensors="pt", truncation=True)
+        generated_text = generate_answer(prompt)
 
-        outputs = model_llm.generate(
-            **inputs,
-            max_new_tokens=200,
-            do_sample=True,
-            temperature=0.7
-        )
-
-        generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
     # STEP 5: CLEAN OUTPUT
     cleaned = ". ".join(dict.fromkeys(generated_text.split(". ")))
