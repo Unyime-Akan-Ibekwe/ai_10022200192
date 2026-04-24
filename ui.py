@@ -54,7 +54,7 @@ st.success("System loaded successfully ✅")
 # -------------------------
 # HELPERS
 # -------------------------
-def manage_context_window(results, max_chars=2500):
+def manage_context_window(results, max_chars=6000):
     current_text = ""
     filtered = []
 
@@ -91,16 +91,11 @@ def generate_answer(prompt):
 def build_prompt(query, results):
     context = "\n".join([r[0] for r in results])
 
-    return f"""
-You are a precise academic assistant.
+    return f"""You are a helpful assistant answering questions about Ghana Elections and the 2025 Ghana Budget.
 
-Answer ONLY using the context below.
-
-Rules:
-- Be clear and factual
-- Use bullet points
-- Combine information if needed
-- If not found, say "Answer not found in context"
+Use the context below to answer the question. The context contains election results and budget information.
+If the answer is in the context, answer clearly and directly.
+If the context is partially relevant, use what you can and say so.
 
 CONTEXT:
 {context}
@@ -108,8 +103,7 @@ CONTEXT:
 QUESTION:
 {query}
 
-ANSWER:
-"""
+ANSWER:"""
 
 
 # -------------------------
@@ -123,7 +117,7 @@ query = st.text_input("🔎 Ask your question", "")
 if st.button("🚀 Submit") and query:
 
     # STEP 1: RETRIEVAL
-    results = hybrid_retrieve(query, chunks, index, k=8)
+    results = hybrid_retrieve(query, chunks, index, k=12)
 
     st.subheader("🔍 Retrieved Chunks")
     for i, (chunk, score) in enumerate(results):
