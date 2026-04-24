@@ -1,6 +1,7 @@
 import streamlit as st
 from rag import load_csv, load_pdf, chunk_text, build_index, hybrid_retrieve
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+import os
 
 
 # 1. Page Config MUST be the very first Streamlit command
@@ -34,11 +35,15 @@ def setup_system():
         index = build_index(chunks)
         
         # LLM
-        model_id = "google/flan-t5-base"
+        model_id = "google/flan-t5-small"
         tokenizer = AutoTokenizer.from_pretrained(model_id)
         model_llm = AutoModelForSeq2SeqLM.from_pretrained(model_id)
         
         return chunks, index, tokenizer, model_llm
+
+st.write("Data loaded successfully")
+
+st.write(os.listdir("data"))
 
 chunks, index, tokenizer, model_llm = setup_system()
 
