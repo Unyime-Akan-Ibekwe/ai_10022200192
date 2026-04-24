@@ -8,10 +8,15 @@ import traceback
 # -------------------------
 st.set_page_config(page_title="Acity AI Assistant", layout="wide")
 
-st.markdown("""
-<h1 style='text-align: center;'>🏛️ Academic City RAG Assistant</h1>
-<p style='text-align: center; color: gray;'>Ask questions about Ghana Elections & 2025 Budget</p>
-""", unsafe_allow_html=True)
+st.markdown(
+    """
+    <h1 style='text-align: center;'>🏛️ Academic City RAG Assistant</h1>
+    <p style='text-align: center; color: gray;'>
+        Ask questions about Ghana Elections & 2025 Budget
+    </p>
+    """,
+    unsafe_allow_html=True
+)
 
 st.write("System initializing...")
 
@@ -40,11 +45,10 @@ def setup_system():
 
         return chunks, index, tokenizer, model_llm
 
-    except Exception as e:
-        st.error("System failed to load")
+    except Exception:
+        st.error("System failed to load ❌")
         st.text(traceback.format_exc())
         st.stop()
-
 
 
 chunks, index, tokenizer, model_llm = setup_system()
@@ -106,11 +110,14 @@ if st.button("🚀 Submit") and query:
     st.subheader("🔍 Retrieved Chunks")
 
     for i, (chunk, score) in enumerate(results):
-        st.markdown(f"""
-        **Chunk {i+1}**  
-        Score: `{score:.4f}`  
-        {chunk[:300]}...
-        """)
+        st.markdown(
+            f"""
+            **Chunk {i+1}**  
+            Score: `{score:.4f}`  
+
+            {chunk[:300]}...
+            """
+        )
 
     # STEP 2: CONTEXT FILTERING
     filtered_results = manage_context_window(results)
@@ -123,7 +130,6 @@ if st.button("🚀 Submit") and query:
 
     # STEP 4: GENERATION
     with st.spinner("Generating answer..."):
-
         inputs = tokenizer(prompt, return_tensors="pt", truncation=True)
 
         outputs = model_llm.generate(
@@ -135,17 +141,20 @@ if st.button("🚀 Submit") and query:
 
         generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-    # STEP 5: OUTPUT CLEANING (simple)
+    # STEP 5: CLEAN OUTPUT
     cleaned = ". ".join(dict.fromkeys(generated_text.split(". ")))
 
     st.subheader("🤖 AI Response")
 
-    st.markdown(f"""
-    <div style="
-        background-color:#161B22;
-        padding:15px;
-        border-radius:10px;
-        border:1px solid #30363d;">
-    {cleaned}
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div style="
+            background-color:#161B22;
+            padding:15px;
+            border-radius:10px;
+            border:1px solid #30363d;">
+        {cleaned}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
