@@ -68,9 +68,8 @@ def manage_context_window(results, max_chars=2500):
 
 HF_API_TOKEN = st.secrets["HF_API_TOKEN"]
 
-
 def generate_answer(prompt):
-    API_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-base"
+    API_URL = "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta"
 
     headers = {
         "Authorization": f"Bearer {HF_API_TOKEN}",
@@ -78,16 +77,17 @@ def generate_answer(prompt):
     }
 
     payload = {
-        "inputs": prompt[:1024],  # flan-t5 has a 512-1024 token limit
+        "inputs": prompt[:3000],
         "parameters": {
-            "max_new_tokens": 200,
-            "temperature": 0.7,
-            "do_sample": True
+            "max_new_tokens": 300,
+            "temperature": 0.5,
+            "do_sample": True,
+            "return_full_text": False
         }
     }
 
     try:
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
 
         if response.status_code == 503:
             return "Model is loading, please wait 20 seconds and try again."
