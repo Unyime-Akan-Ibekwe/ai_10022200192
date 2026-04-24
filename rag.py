@@ -147,18 +147,28 @@ def hybrid_retrieve(query, chunks, index, k=5):
     return scored[:k]
 
 
-
 def get_winners_from_csv(df):
     winners = []
 
-    grouped = df.groupby("Year")
+    # National winner per year (sum votes across all regions)
+    grouped_year = df.groupby(["Year", "Candidate", "Party"])["Votes"].sum().reset_index()
 
-    for year, group in grouped:
-        winner = group.loc[group["Votes"].idxmax()]
+    for year, group in grouped_year.groupby("Year"):
+        national_winner = group.loc[group["Votes"].idxmax()]
+        total_votes = group["Votes"].sum()
+        pct = round((national_winner["Votes"] / total_votes) * 100, 2)
 
         winners.append(
-            f"Year {year} winner: {winner['Candidate']} ({winner['Party']}) with {winner['Votes']} votes ({winner['Votes(%)']}%)"
+            f"National winner of {year} Ghana election: {national_winner['Candidate']} "
+            f"({national_winner['Party']}) with {national_winner['Votes']:,} total votes nationwide ({pct}%)"
+        )
+
+    # Regional winners per year
+    for (year, region), group in df.groupby(["Year", "New Region"]):
+        regional_winner = group.loc[group["Votes"].idxmax()]
+        winners.append(
+            f"In {year}, {region} region winner: {regional_winner['Candidate']} "
+            f"({regional_winner['Party']}) with {regional_winner['Votes']:,} votes"
         )
 
     return winners
-
