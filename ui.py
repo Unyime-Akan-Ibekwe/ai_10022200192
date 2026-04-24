@@ -69,7 +69,7 @@ def manage_context_window(results, max_chars=2500):
 HF_API_TOKEN = st.secrets["HF_API_TOKEN"]
 
 def generate_answer(prompt):
-    API_URL = "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta"
+    API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1"
 
     headers = {
         "Authorization": f"Bearer {HF_API_TOKEN}",
