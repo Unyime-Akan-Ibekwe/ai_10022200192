@@ -21,7 +21,7 @@ st.write("Starting system setup...")
 
 
 # --- 1. CACHED SETUP (Runs once) ---
-# --- @st.cache_resource
+@st.cache_resource
 def setup_system():
     try:
         with st.spinner("Loading Data & Models... (This takes a moment)"):
@@ -42,8 +42,6 @@ def setup_system():
         
           # LLM
           model_id = "google/flan-t5-small"
-          tokenizer = AutoTokenizer.from_pretrained(model_id)
-          model_llm = AutoModelForSeq2SeqLM.from_pretrained(model_id)
 
           if os.path.exists("data"):
               st.write("FILES:", os.listdir("data"))
@@ -119,7 +117,7 @@ if st.button("🚀 Submit", use_container_width=True):
     if query:
         # Retrieval
         st.subheader("🔍 Retrieval Stage")
-        results = hybrid_retrieve(query, chunks, index, k=20)
+        results = hybrid_retrieve(query, chunks, index, k=5)
 
         print("\n--- DEBUG RETRIEVAL ---")
         for chunk, score in results:
@@ -147,14 +145,15 @@ if st.button("🚀 Submit", use_container_width=True):
             prompt = build_prompt(query, filtered_results)
             
             # Manual LLM Generation
-            inputs = tokenizer(prompt, return_tensors="pt")
-            outputs = model_llm.generate(
-                                    **inputs,
-                                    max_new_tokens=150,
-                                    do_sample=False,   
-                                    repetition_penalty=1.2,  # stops looping
-                                    length_penalty=1.0
-)
+            @st.cache_resource
+            def load_llm():
+                 model_id = "google/flan-t5-small"
+                 tokenizer = AutoTokenizer.from_pretrained(model_id)
+                 model = AutoModelForSeq2SeqLM.from_pretrained(model_id)
+                 return tokenizer, model
+
+            tokenizer, model_llm = load_llm()
+
 
 
             generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
