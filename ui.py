@@ -70,36 +70,45 @@ HF_API_TOKEN = st.secrets["HF_API_TOKEN"]
 
 
 def generate_answer(prompt):
-    API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
+    API_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-base"
 
     headers = {
-        "Authorization": f"Bearer {HF_API_TOKEN}"
+        "Authorization": f"Bearer {HF_API_TOKEN}",
+        "Content-Type": "application/json"
     }
 
     payload = {
-        "inputs": prompt,
+        "inputs": prompt[:1024],  # flan-t5 has a 512-1024 token limit
         "parameters": {
             "max_new_tokens": 200,
-            "temperature": 0.7
+            "temperature": 0.7,
+            "do_sample": True
         }
     }
 
-    response = requests.post(API_URL, headers=headers, json=payload)
+    try:
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
 
-    if response.status_code != 200:
-        return f"Error: {response.text}"
+        if response.status_code == 503:
+            return "Model is loading, please wait 20 seconds and try again."
 
-    result = response.json()
+        if response.status_code != 200:
+            return f"Error {response.status_code}: {response.text}"
 
-    # 🔥 Handle loading state
-    if isinstance(result, dict) and "error" in result:
-        return f"Model issue: {result['error']}"
+        result = response.json()
 
-    if isinstance(result, list):
-        return result[0].get("generated_text", str(result[0]))
+        if isinstance(result, dict) and "error" in result:
+            return f"Model issue: {result['error']}"
 
-    return str(result)
+        if isinstance(result, list):
+            return result[0].get("generated_text", str(result[0]))
 
+        return str(result)
+
+    except requests.exceptions.Timeout:
+        return "Request timed out. The model may be cold-starting, try again."
+    except Exception as e:
+        return f"Unexpected error: {str(e)}"
 
 
 def build_prompt(query, results):
