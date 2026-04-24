@@ -18,8 +18,7 @@ st.write("System initializing...")
 # -------------------------
 # LOAD SYSTEM (CACHED)
 # -------------------------
-@st.cache_resource
-def setup_system():
+@st.cache_resource(show_spinner=False)
     try:
         csv_data, winner_chunks = load_csv("data/Ghana_Election_Result.csv")
         pdf_data = load_pdf("data/budget.pdf")
