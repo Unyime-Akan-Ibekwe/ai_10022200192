@@ -46,6 +46,7 @@ def setup_system():
         st.stop()
 
 
+
 chunks, index, tokenizer, model_llm = setup_system()
 
 st.success("System loaded successfully ✅")
