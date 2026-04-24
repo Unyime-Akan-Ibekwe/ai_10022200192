@@ -148,15 +148,18 @@ Score: {score:.4f}
 
     st.subheader("🤖 AI Response")
     st.markdown(
-        f"""
+    f"""
 <div style="
     background-color:#161B22;
     padding:15px;
     border-radius:10px;
     border:1px solid #30363d;
+    color:#FFFFFF;
+    font-size:16px;
+    line-height:1.6;
 ">
 {cleaned}
 </div>
 """,
-        unsafe_allow_html=True
-    )
+    unsafe_allow_html=True
+)
