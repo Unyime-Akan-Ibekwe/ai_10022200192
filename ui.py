@@ -70,7 +70,7 @@ HF_API_TOKEN = st.secrets["HF_API_TOKEN"]
 
 
 def generate_answer(prompt):
-    API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-small"
+    API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
 
     headers = {
         "Authorization": f"Bearer {HF_API_TOKEN}"
@@ -91,13 +91,15 @@ def generate_answer(prompt):
 
     result = response.json()
 
-    # HF sometimes returns list or dict
+    # 🔥 Handle loading state
+    if isinstance(result, dict) and "error" in result:
+        return f"Model issue: {result['error']}"
+
     if isinstance(result, list):
-        return result[0]["generated_text"]
-    elif isinstance(result, dict):
-        return result.get("generated_text", str(result))
+        return result[0].get("generated_text", str(result[0]))
 
     return str(result)
+
 
 
 def build_prompt(query, results):
