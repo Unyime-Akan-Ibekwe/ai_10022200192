@@ -216,7 +216,7 @@ The `manage_context_window` function accumulates chunks by character count until
 ## 8. Part F: Architecture and System Design
 
 ### Architecture Diagram:
-*(See Architecture.png in repository)*
+<img width="751" height="422" alt="Architecture" src="https://github.com/user-attachments/assets/f0db7a15-8685-40c4-8f66-85e8a7df15f3" />
 
 The pipeline runs in two phases:
 
