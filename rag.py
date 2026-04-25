@@ -138,10 +138,30 @@ def hybrid_retrieve(query, chunks, index, k=5):
         keyword_score = sum(1 for word in keywords if word in chunk_lower)
         keyword_score = keyword_score / len(keywords) if keywords else 0
 
-        # smarter domain boosting
+        # Domain-specific scoring function (Innovation Component)
         domain_boost = 0
+
+        # Budget domain keywords
         if any(word in chunk_lower for word in ["risk", "challenge", "threat", "debt", "inflation"]):
-            domain_boost += 0.5
+            domain_boost += 0.3
+        if any(word in chunk_lower for word in ["budget", "fiscal", "revenue", "expenditure", "gdp", "deficit"]):
+            domain_boost += 0.3
+        if any(word in chunk_lower for word in ["petroleum", "oil", "energy", "cocoa", "gold"]):
+            domain_boost += 0.2
+
+        # Election domain keywords
+        if any(word in chunk_lower for word in ["winner", "national", "votes", "candidate", "party"]):
+            domain_boost += 0.3
+        if any(word in chunk_lower for word in ["ndc", "npp", "electoral", "region", "election"]):
+            domain_boost += 0.2
+
+        # Boost chunks that contain numbers/statistics (more factual)
+        import re
+        if re.search(r'\d+', chunk_lower):
+            domain_boost += 0.1
+
+        # Cap boost to avoid overwhelming vector score
+        domain_boost = min(domain_boost, 1.0)
 
         final_score = (0.5 * vector_score) + (0.3 * keyword_score) + (0.5 * domain_boost)
 
