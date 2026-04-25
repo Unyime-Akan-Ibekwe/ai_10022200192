@@ -5,7 +5,7 @@
 **Course:** CS4241 — Introduction to Artificial Intelligence  
 **Date:** April 2026  
 
----
+
 
 ## Log 1 — Chunking Strategy Experiment
 
@@ -27,7 +27,7 @@ Same query tested with different chunk sizes in `chunk_text()`
 **Conclusion:**  
 500 characters with 100 overlap gave the best balance between context and precision. This was chosen as the final chunking strategy.
 
----
+
 
 ## Log 2 — Retrieval Quality Experiment
 
@@ -54,7 +54,7 @@ Compare vector-only retrieval vs hybrid retrieval
 **Conclusion:**  
 Hybrid retrieval significantly improved relevance for domain-specific queries. Pure vector search missed keyword-heavy factual chunks.
 
----
+
 
 ## Log 3 — Query Expansion Experiment
 
@@ -84,7 +84,7 @@ Expanded query:
 **Conclusion:**  
 Query expansion significantly improved recall for short domain queries. Essential for budget-related questions.
 
----
+
 
 ## Log 4 — Prompt Engineering Experiment
 
@@ -109,7 +109,7 @@ Compare different prompt designs on the same query
 **Conclusion:**  
 Strict prompts lead to false negatives. Flexible prompts with honesty instructions provide better answers while controlling hallucination.
 
----
+
 
 ## Log 5 — Context Window Experiment
 
@@ -128,7 +128,7 @@ Test how context size affects answer quality
 **Conclusion:**  
 A larger context window (6000 characters) produced significantly richer answers for broad queries. This was selected as the final configuration.
 
----
+
 
 ## Log 6 — Adversarial Query Experiment
 
@@ -141,7 +141,7 @@ Test system robustness on ambiguous and misleading queries
 - **Hallucination:** None  
 - **Verdict:** Handled well 
 
----
+
 
 ### Query 2:  
 "How much money did Ghana make from oil in the 2025 budget?" (Misleading)
