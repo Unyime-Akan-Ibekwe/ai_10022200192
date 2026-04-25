@@ -30,4 +30,4 @@ streamlit run ui.py
 ```
 
 ## Deployed App
-https://unyime-akan-ibekwe-ai-10022200192-ui-m00nyv.streamlit.app
+https://unyime-akan-ibekwe-ai-10022200192-ui-uupix0.streamlit.app/
